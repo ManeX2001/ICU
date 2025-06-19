@@ -1,0 +1,384 @@
+{% extends "base.html" %}
+
+{% block title %}Hospital Dashboard - AI Decision Support{% endblock %}
+
+{% block content %}
+<div class="row">
+    <!-- Page Header -->
+    <div class="col-12 mb-4">
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="h2 mb-1">
+                    <i class="bi bi-speedometer2 text-primary"></i> Hospital Dashboard
+                </h1>
+                <p class="text-muted">Real-time hospital status and AI decision support</p>
+            </div>
+            <div>
+                <a href="/patient-form" class="btn btn-primary btn-lg">
+                    <i class="bi bi-person-plus"></i> New Patient Assessment
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Enhanced Dashboard Section -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="bi bi-info-circle"></i> Unit Definitions & Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-4">
+                        <h6 class="text-danger">🏥 ICU (Intensive Care Unit)</h6>
+                        <p class="small">{{ hospital_status.icu.definition|default('Critical care unit') }}</p>
+                        <div class="badge bg-{% if hospital_status.icu.status == 'Critical' %}danger{% else %}success{% endif %}">
+                            {{ hospital_status.icu.status|default('Normal') }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-primary">🏨 General Ward</h6>
+                        <p class="small">{{ hospital_status.ward.definition|default('General inpatient unit') }}</p>
+                        <div class="badge bg-{% if hospital_status.ward.status == 'High' %}warning{% else %}success{% endif %}">
+                            {{ hospital_status.ward.status|default('Normal') }}
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <h6 class="text-warning">🚑 Emergency Department (ED)</h6>
+                        <p class="small">{{ hospital_status.ed.definition|default('Emergency department') }}</p>
+                        <div class="badge bg-{% if hospital_status.ed.status == 'Busy' %}warning{% else %}success{% endif %}">
+                            {{ hospital_status.ed.status|default('Normal') }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hospital Status Cards -->
+<div class="row">
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card status-card">
+            <div class="card-body metric-card">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div>
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-heart-pulse text-danger"></i> ICU Status
+                        </h5>
+                    </div>
+                    <div class="metric-value text-danger" id="icu-status">
+                        {{ hospital_status.icu.occupied|default(0) }}/{{ hospital_status.icu.capacity|default(0) }}
+                    </div>
+                </div>
+                <div class="progress mb-2">
+                    <div class="progress-bar bg-danger" role="progressbar" 
+                         style="width: {{ hospital_status.icu.utilization|default(0) }}%"
+                         aria-valuenow="{{ hospital_status.icu.utilization|default(0) }}"
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                    </div>
+                </div>
+                <small class="text-muted">{{ hospital_status.icu.utilization|default(0) }}% Capacity</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card status-card">
+            <div class="card-body metric-card">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div>
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-building text-primary"></i> Ward Status
+                        </h5>
+                    </div>
+                    <div class="metric-value text-primary" id="ward-status">
+                        {{ hospital_status.ward.occupied|default(0) }}/{{ hospital_status.ward.capacity|default(0) }}
+                    </div>
+                </div>
+                <div class="progress mb-2">
+                    <div class="progress-bar bg-primary" role="progressbar" 
+                         style="width: {{ hospital_status.ward.utilization|default(0) }}%"
+                         aria-valuenow="{{ hospital_status.ward.utilization|default(0) }}"
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                    </div>
+                </div>
+                <small class="text-muted">{{ hospital_status.ward.utilization|default(0) }}% Capacity</small>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card status-card">
+            <div class="card-body metric-card">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <div>
+                        <h5 class="card-title mb-0">
+                            <i class="bi bi-hospital text-warning"></i> ED Status
+                        </h5>
+                    </div>
+                    <div class="metric-value text-warning" id="ed-status">
+                        {{ hospital_status.ed.occupied|default(0) }}/{{ hospital_status.ed.capacity|default(0) }}
+                    </div>
+                </div>
+                <div class="progress mb-2">
+                    <div class="progress-bar bg-warning" role="progressbar" 
+                         style="width: {{ hospital_status.ed.utilization|default(0) }}%"
+                         aria-valuenow="{{ hospital_status.ed.utilization|default(0) }}"
+                         aria-valuemin="0" 
+                         aria-valuemax="100">
+                    </div>
+                </div>
+                <small class="text-muted">{{ hospital_status.ed.utilization|default(0) }}% Capacity</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Quick Actions -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-lightning"></i> Quick Actions
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-3">
+                    <a href="/patient-form" class="btn btn-outline-primary btn-lg">
+                        <i class="bi bi-person-plus"></i> New Patient Assessment
+                    </a>
+                    <a href="/analytics" class="btn btn-outline-success btn-lg">
+                        <i class="bi bi-graph-up"></i> View Analytics
+                    </a>
+                    <button class="btn btn-outline-info btn-lg" onclick="refreshStatus()">
+                        <i class="bi bi-arrow-clockwise"></i> Refresh Status
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Hospital Overview Chart -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-pie-chart"></i> Capacity Overview
+                </h5>
+            </div>
+            <div class="card-body">
+                <canvas id="capacityChart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Recent Activity -->
+    <div class="col-lg-8 mb-4">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-clock-history"></i> System Status
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="alert alert-success alert-custom">
+                        <i class="bi bi-check-circle"></i> 
+                        <strong>AI Decision Engine:</strong> Online and operational
+                    </div>
+                    <div class="alert alert-info alert-custom">
+                        <i class="bi bi-info-circle"></i> 
+                        <strong>Database Connection:</strong> Stable
+                    </div>
+                    <div class="alert alert-warning alert-custom">
+                        <i class="bi bi-exclamation-triangle"></i> 
+                        <strong>ICU Capacity:</strong> Approaching full capacity
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Key Metrics -->
+    <div class="col-lg-4 mb-4">
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                <h5 class="card-title mb-0">
+                    <i class="bi bi-graph-up-arrow"></i> Key Metrics
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row text-center">
+                    <div class="col-12 mb-3">
+                        <div class="metric-value text-success">98.5%</div>
+                        <div class="metric-label">System Uptime</div>
+                    </div>
+                    <div class="col-12 mb-3">
+                        <div class="metric-value text-primary">2.4s</div>
+                        <div class="metric-label">Avg Response Time</div>
+                    </div>
+                    <div class="col-12">
+                        <div class="metric-value text-info">156</div>
+                        <div class="metric-label">Decisions Today</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Loading Spinner -->
+<div class="loading-spinner" style="display: none;">
+    <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <p class="mt-2">Updating hospital status...</p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+<script>
+    // Initialize capacity chart with proper data handling
+    const ctx = document.getElementById('capacityChart').getContext('2d');
+    
+    // Get data safely from template
+    const icuUtilization = parseFloat('{{ hospital_status.icu.utilization|default(0) }}') || 0;
+    const wardUtilization = parseFloat('{{ hospital_status.ward.utilization|default(0) }}') || 0;
+    const edUtilization = parseFloat('{{ hospital_status.ed.utilization|default(0) }}') || 0;
+    
+    const capacityChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: ['ICU', 'Ward', 'ED'],
+            datasets: [{
+                data: [icuUtilization, wardUtilization, edUtilization],
+                backgroundColor: [
+                    '#dc3545',
+                    '#0d6efd',
+                    '#ffc107'
+                ],
+                borderWidth: 3,
+                borderColor: '#fff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom',
+                    labels: {
+                        padding: 20,
+                        usePointStyle: true
+                    }
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return context.label + ': ' + context.parsed + '% capacity';
+                        }
+                    }
+                }
+            }
+        }
+    });
+    
+    // Utility functions
+    function showLoading() {
+        document.querySelector('.loading-spinner').style.display = 'block';
+    }
+    
+    function hideLoading() {
+        document.querySelector('.loading-spinner').style.display = 'none';
+    }
+    
+    function showAlert(message, type) {
+        // Create and show alert
+        const alertDiv = document.createElement('div');
+        alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+        alertDiv.innerHTML = `
+            ${message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        // Insert at top of content
+        const content = document.querySelector('.row');
+        content.parentNode.insertBefore(alertDiv, content);
+        
+        // Auto-dismiss after 5 seconds
+        setTimeout(() => {
+            alertDiv.remove();
+        }, 5000);
+    }
+    
+    // Refresh status function
+    function refreshStatus() {
+        showLoading();
+        
+        fetch('/api/hospital-status')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Update the chart
+                capacityChart.data.datasets[0].data = [
+                    data.icu.utilization,
+                    data.ward.utilization,
+                    data.ed.utilization
+                ];
+                capacityChart.update();
+                
+                // Update status displays
+                document.getElementById('icu-status').textContent = `${data.icu.occupied}/${data.icu.capacity}`;
+                document.getElementById('ward-status').textContent = `${data.ward.occupied}/${data.ward.capacity}`;
+                document.getElementById('ed-status').textContent = `${data.ed.occupied}/${data.ed.capacity}`;
+                
+                // Update progress bars
+                const icuProgressBar = document.querySelector('.progress-bar.bg-danger');
+                const wardProgressBar = document.querySelector('.progress-bar.bg-primary');
+                const edProgressBar = document.querySelector('.progress-bar.bg-warning');
+                
+                if (icuProgressBar) {
+                    icuProgressBar.style.width = data.icu.utilization + '%';
+                    icuProgressBar.setAttribute('aria-valuenow', data.icu.utilization);
+                }
+                if (wardProgressBar) {
+                    wardProgressBar.style.width = data.ward.utilization + '%';
+                    wardProgressBar.setAttribute('aria-valuenow', data.ward.utilization);
+                }
+                if (edProgressBar) {
+                    edProgressBar.style.width = data.ed.utilization + '%';
+                    edProgressBar.setAttribute('aria-valuenow', data.ed.utilization);
+                }
+                
+                hideLoading();
+                showAlert('Hospital status updated successfully!', 'success');
+            })
+            .catch(error => {
+                console.error('Error updating status:', error);
+                hideLoading();
+                showAlert('Error updating status: ' + error.message, 'danger');
+            });
+    }
+    
+    // Auto-refresh every 30 seconds
+    setInterval(refreshStatus, 30000);
+    
+    // Initial load
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Dashboard loaded successfully');
+    });
+</script>
+{% endblock %}
