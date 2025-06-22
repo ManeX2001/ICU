@@ -34,3 +34,20 @@ def get_hospital_status():
         }
     }
     return jsonify(hospital_status)
+
+
+# ---------------------------------------------------------------------------
+# API endpoint: /admission-decision
+# ---------------------------------------------------------------------------
+
+@api.route('/admission-decision', methods=['POST'])
+def admission_decision():
+    """Return an admission decision based on provided patient data."""
+    # Grab JSON data from the request
+    payload = request.get_json() or {}
+
+    # TODO: Integrate a real ML model here. For now, use a simple rule.
+    condition = str(payload.get('condition', '')).lower()
+    decision = 'admit' if condition == 'severe' else 'discharge'
+
+    return jsonify({'success': True, 'result': decision})
